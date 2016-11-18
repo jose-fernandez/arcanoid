@@ -1,6 +1,7 @@
 class game{
 	constructor(x, y){
 		var cont=0;
+		this.bool=true;
 		this.x=x;
 		this.y=y;
 		this.list=[];
@@ -18,16 +19,16 @@ class game{
 
 	start(x){
 		var cont=0;
-		this.list=[];
-		if (this.deleteCanvas()){
-			this.deleteCanvas();
-			this.field=this.build();
-		}
-		for (let i=0;i<x;i++){
-			let r = this.random();
-			this.list.push(new circle(cont, r[0],r[1],r[2],r[3]));
-			cont++;
-		}
+		this.bool= !this.bool;
+		if (this.bool){
+			deleteCanvas(); //llamar a run otra vez para que continue
+		}else{
+			for (let i=0;i<x;i++){
+				let r = this.random();
+				this.list.push(new circle(cont, r[0],r[1],r[2],r[3]));
+				cont++;
+			}
+		}	
 		this.run();
 	}
 	deleteCanvas(){
@@ -132,10 +133,9 @@ class circle{
 
 
 function init(){
-	new game(400,300);
 	document.getElementById("start").addEventListener("click", function(){
 		arcanoid=new game(400,300);
-		arcanoid.start(50);
+		arcanoid.start(1);
 	});
 	document.getElementById("finish").addEventListener("click", function(){
 		arcanoid.stop();
