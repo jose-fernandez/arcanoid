@@ -1,28 +1,61 @@
 class game{
 	constructor(x, y){
+		var cont=0;
 		this.x=x;
 		this.y=y;
+		this.list=[];
 		this.build();
-		this.run();
 	}
 	build(){
 		var bg= document.createElementNS ("http://www.w3.org/2000/svg", "svg");
-		bg.setAttribute("height",`${this.x}`);
-		bg.setAttribute("width",`${this.y}`);
+		bg.setAttribute("height",`${this.y}`);
+		bg.setAttribute("width",`${this.x}`);
 		bg.setAttribute("id",`contenedor`);
-		bg.setAttribute("fill", "grey");
+		bg.style.backgroundColor="grey";
 
-		document.body.insertBefore(bg, document.getElementById("btn"));
+		document.body.insertBefore(bg, document.getElementById("start"));
+	}
+
+	start(x){
+		var cont=0;
+		this.list=[];
+		if (this.deleteCanvas()){
+			this.deleteCanvas();
+			this.field=this.build();
+		}
+		for (let i=0;i<x;i++){
+			let r = this.random();
+			this.list.push(new circle(cont, r[0],r[1],r[2],r[3]));
+			cont++;
+		}
+		this.run();
+	}
+	deleteCanvas(){
+		if(document.getElementById("contenedor").remove())
+			return true;
+		else{return false;}
+	}
+
+	stop(){
+		clearInterval(this.sI);
+	}
+
+	random(){
+		var x=Math.floor(Math.random() * (385 - 14)) + 14;
+		var y=Math.floor(Math.random() * (285 - 14)) + 14;
+		var vx=Math.floor(Math.random() * (7 - 1)) + 1;
+		var vy=Math.floor(Math.random() * (7 - 1)) + 1;
+		var list=[x,y,vx,vy];
+		return list;
 	}
 	run(){
 		var that=this;
-		setInterval((that.drawBalls),100);
+		this.sI=setInterval((()=>this.drawBalls(that)),10);
 	}
 
-	drawBalls(){
-		var list = document.getElementsByTagName("ellipse");
-		for (let i=0;i<list.length;i++){
-			list[i].calculateMove();
+	drawBalls(x){
+		for (let i=0;i<x.list.length;i++){
+			x.list[i].calculateMove(this);
 		}
 	}
 }
@@ -36,7 +69,7 @@ class circle{
 		this.ry=10;
 		this.vx=vx;
 		this.vy=vy;
-
+		this.st=4;
 
 		this.build();
 	}
@@ -51,7 +84,7 @@ class circle{
 		cir.setAttribute("rx",`${this.rx}`);
 		cir.setAttribute("ry",`${this.ry}`);
 		cir.setAttribute("stroke", `Dark${this.listColor[this.pos]}`);
-		cir.setAttribute("stroke-width", 4);
+		cir.setAttribute("stroke-width", this.st);
 		cir.setAttribute("fill", this.listColor[this.pos]);
 
 		document.getElementById("contenedor").appendChild(cir);
@@ -59,17 +92,34 @@ class circle{
 
 	calculateMove(x){
 		var eli=document.getElementsByTagName("ellipse");
-		if (this.py>290 || this.py<10){
+		if(this.py>(x.y-(this.ry+this.st)) && this.px<(0+this.rx+this.st) ||
+			this.py>(x.y-(this.ry+this.st)) && this.px>(x.x-(this.rx+this.st))|| 
+			this.py<(0+this.ry+this.st) && this.px>(x.x-(this.rx+this.st)) ||
+			this.py<(0+this.ry+this.st) && this.px<(0+this.rx+this.st)){
+				eli[this.id].setAttribute("rx",`${this.rx}`);
+				this.rx=10;
+				this.vx=this.vx*(-1);
+				eli[this.id].setAttribute("ry",`${this.ry}`);
+				this.ry=10;
+				this.vy=this.vy*(-1);
+
+		}else if (this.py>(x.y-(this.ry+this.st)) || this.py<(0+this.ry+this.st)){
 			this.vy=this.vy*(-1);
 			eli[this.id].setAttribute("rx",13);
+			this.rx=13;
 			eli[this.id].setAttribute("ry",7);
-		}else if(this.px>390 || this.px<10){
+			this.ry=7;
+		}else if(this.px>(x.x-(this.rx+this.st)) || this.px<(0+this.rx+this.st)){
 			this.vx=this.vx*(-1);
 			eli[this.id].setAttribute("ry",13);
+			this.ry=13;
 			eli[this.id].setAttribute("rx",7);
+			this.rx=7;
 		}else{
 			eli[this.id].setAttribute("rx",`${this.rx}`);
+			this.rx=10;
 			eli[this.id].setAttribute("ry",`${this.ry}`);
+			this.ry=10;
 		}
 		this.px=this.px+this.vx;
 		eli[this.id].setAttribute("cx",`${this.px}`);
@@ -82,26 +132,19 @@ class circle{
 
 
 function init(){
-	var cont=0;
-	document.getElementById("btn").addEventListener("click", function(){
-		var rand=random();
-		var cirObj=new circle(cont,rand[0],rand[1],rand[2],rand[3]);
-		cont++;
+	new game(400,300);
+	document.getElementById("start").addEventListener("click", function(){
+		arcanoid=new game(400,300);
+		arcanoid.start(50);
+	});
+	document.getElementById("finish").addEventListener("click", function(){
+		arcanoid.stop();
 	});
 }
 
-function random(){
-	var x=Math.floor(Math.random() * (385 - 14)) + 14;
-	var y=Math.floor(Math.random() * (285 - 14)) + 14;
-	var vx=Math.floor(Math.random() * (7 - 1)) + 1;
-	var vy=Math.floor(Math.random() * (7 - 1)) + 1;
-	var list=[x,y,vx,vy];
-	return list;
-}
 
 
 
 window.onload=function(){
-	new game(400,300);
 	init();
 };
