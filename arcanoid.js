@@ -6,89 +6,57 @@ class game{
 		this.y=y;
 		this.list=[];
 		this.build();
+		this.createElements();
 	}
 	build(){
 		var bg= document.createElementNS ("http://www.w3.org/2000/svg", "svg");
 		bg.setAttribute("height",`${this.y}`);
 		bg.setAttribute("width",`${this.x}`);
-		bg.setAttribute("id",`contenedor`);
+		bg.setAttribute("id",`container`);
 		bg.style.backgroundColor="grey";
 
-		document.body.insertBefore(bg, document.getElementById("start"));
+		document.getElementById("arcanoid").appendChild(bg);
 	}
+	createElements(){
+		this.ball=new ball(200,450,2,1,10);
+		//this.bar=new block(160,462,80,10); Traditional way
+		this.bar=new bar();
 
-	start(x){
-		var cont=0;
-		this.bool= !this.bool;
-		if (this.bool){
-			deleteCanvas(); //llamar a run otra vez para que continue
-		}else{
-			for (let i=0;i<x;i++){
-				let r = this.random();
-				this.list.push(new circle(cont, r[0],r[1],r[2],r[3]));
-				cont++;
+		for (let i=10;i<106;i+=19){
+			for(let j=10;j<335;j+=54){
+				this.list.push(new block(j,i, 50,15));
 			}
-		}	
-		this.run();
-	}
-	deleteCanvas(){
-		if(document.getElementById("contenedor").remove())
-			return true;
-		else{return false;}
+		}		
 	}
 
-	stop(){
-		clearInterval(this.sI);
-	}
-
-	random(){
-		var x=Math.floor(Math.random() * (385 - 14)) + 14;
-		var y=Math.floor(Math.random() * (285 - 14)) + 14;
-		var vx=Math.floor(Math.random() * (7 - 1)) + 1;
-		var vy=Math.floor(Math.random() * (7 - 1)) + 1;
-		var list=[x,y,vx,vy];
-		return list;
-	}
-	run(){
-		var that=this;
-		this.sI=setInterval((()=>this.drawBalls(that)),10);
-	}
-
-	drawBalls(x){
-		for (let i=0;i<x.list.length;i++){
-			x.list[i].calculateMove(this);
-		}
-	}
 }
 
-class circle{
-	constructor(id, x,y,vx,vy){
-		this.id=id;
-		this.px=x;
-		this.py=y;
-		this.rx=10;
-		this.ry=10;
+class ball{
+	constructor(cx,cy,vx,vy,r){
+		this.cx=cx;
+		this.cy=cy;
+		this.r=r;
 		this.vx=vx;
 		this.vy=vy;
-		this.st=4;
+/*Cálculo de 8 puntos
+for (let grad=0; grad<360; grad+=45) {
+	var p_x = self.bolas[i].r * Math.cos(grad) + self.bolas[i].x;
+	var p_y = self.bolas[i].r * Math.cos(grad) + self.bolas[i].y;
+}*/
 
 		this.build();
 	}
 
 	build(){
-		this.listColor=["blue","cyan", "GoldenRod", "green", "red", "magenta", "violet","orange"];
-		this.pos=Math.floor(Math.random() * (6 - 0)) + 0;
+		var cir= document.createElementNS ("http://www.w3.org/2000/svg", "circle");
+		cir.setAttribute("cx",`${this.cx}`);
+		cir.setAttribute("cy",`${this.cy}`);
+		cir.setAttribute("r",`${this.r}`);
+		cir.setAttribute("stroke", `black`);
+		cir.setAttribute("stroke-width", 2);
+		cir.setAttribute("fill", "white");
 
-		var cir= document.createElementNS ("http://www.w3.org/2000/svg", "ellipse");
-		cir.setAttribute("cx",`${this.px}`);
-		cir.setAttribute("cy",`${this.py}`);
-		cir.setAttribute("rx",`${this.rx}`);
-		cir.setAttribute("ry",`${this.ry}`);
-		cir.setAttribute("stroke", `Dark${this.listColor[this.pos]}`);
-		cir.setAttribute("stroke-width", this.st);
-		cir.setAttribute("fill", this.listColor[this.pos]);
-
-		document.getElementById("contenedor").appendChild(cir);
+		document.getElementById("container").appendChild(cir);
 	}
 
 	calculateMove(x){
@@ -130,21 +98,52 @@ class circle{
 	}
 }
 
+class block{
+	constructor(x,y,w,h){
+		this.x=x;
+		this.y=y;
+		this.w=w;
+		this.h=h;
+		this.build();
+	}
+	build(){
+		var rec= document.createElementNS ("http://www.w3.org/2000/svg", "rect");
+		rec.setAttribute("x",`${this.x}`);
+		rec.setAttribute("y",`${this.y}`);
+		rec.setAttribute("width",`${this.w}`);
+		rec.setAttribute("height",`${this.h}`);
+		rec.setAttribute("stroke", `black`);
+		rec.setAttribute("stroke-width", 2);
+		rec.setAttribute("fill", "white");
 
+		document.getElementById("container").appendChild(rec);
+	}
+}
 
-function init(){
-	document.getElementById("start").addEventListener("click", function(){
-		arcanoid=new game(400,300);
-		arcanoid.start(1);
-	});
-	document.getElementById("finish").addEventListener("click", function(){
-		arcanoid.stop();
-	});
+class bar{
+	constructor(){
+		this.build();
+	}
+	build(){
+		var pol= document.createElementNS ("http://www.w3.org/2000/svg", "polyline");
+		pol.setAttribute("points",`150, 440, 200, 480, 250, 440`);//points=x,y;x,y;x,y
+		pol.setAttribute("stroke", `black`);
+		pol.setAttribute("stroke-width", 15);
+		pol.setAttribute("fill", "none");
+		pol.setAttribute("stroke-linejoin", "bevel");
+		pol.setAttribute("stroke-linecap", "bevel");
+
+		document.getElementById("container").appendChild(pol);
+	}
+}
+
+class controller{
+	constructor(){
+		this.game = new game(400,500);
+	}
 }
 
 
-
-
 window.onload=function(){
-	init();
+	new controller();
 };
